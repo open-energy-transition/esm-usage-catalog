@@ -1,0 +1,9 @@
+id,product_name,vendor_name,official_product_URL,typical_use_case
+1,PLEXOS,Energy Exemplar,https://www.energyexemplar.com/plexos,"Long, medium & short-term energy market simulation and optimization (capacity planning, production cost, scenario analysis). "
+2,PlanOS,GE Vernova,https://www.gevernova.com/consulting/planos,"Integrated system planning (production cost, resource adequacy, power flow modeling) combining multiple legacy tools."
+3,PROMOD,Hitachi Energy,https://www.hitachienergy.com/in/en/products-and-solutions/energy-portfolio-management/enterprise/promod,"Electric generation & transmission market simulation for planning, forecasting, nodal pricing and congestion analysis."
+4,ETAP,ETAP,https://etap.com,"Comprehensive power system design, simulation, reliability, transient and optimal power flow studies."
+5,SERVM,PowerGEM,https://power-gem.co/software/servm-resource-adequacy-planning/,Resource adequacy analysis and capacity expansion scenario modeling (reliability + economics).
+6,PROBE,PowerGEM,https://power-gem.co/software/probe-energy-market-modeling/,Production cost modeling for electricity markets with nodal pricing and asset valuation. 
+7,TARA,PowerGEM,https://power-gem.co/software/tara-software/,Load flow simulation and transmission reliability analysis for power system planning.
+8,DAYZER,PowerGEM,https://power-gem.co/software/dayzer/,Locational market-clearing price forecasting and congestion cost analysis.
