@@ -1,2 +1,3 @@
-# esm-usage-catalog
-Investigate usage of energy system models of grid operators
+# Energy System Model Use-Case Catalogue
+
+This repository documents how ministries, regulators, and grid operators use energy modelling frameworks in practice.
