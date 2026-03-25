@@ -13,7 +13,7 @@ from streamlit_option_menu import option_menu
 # ----------------------------
 # App config & styling
 # ----------------------------
-APP_NAME = "Grid Operators Modelling Usage Explorer"
+APP_NAME = "Energy Model Use-Case Tracker"
 CSV_FILENAME = "national-electricity-ecosystem-2026-02-16.csv-curated.csv"
 
 st.set_page_config(
@@ -24,180 +24,71 @@ st.set_page_config(
 )
 
 
-# ----------------------------
-# Top-right Dark Mode Toggle
-# ----------------------------
-if "dark_mode" not in st.session_state:
-    st.session_state.dark_mode = False
+CUSTOM_CSS = """
+<style>
+.stApp {
+    background-color: #0E1117;
+    color: #FAFAFA;
+}
 
-def toggle_theme():
-    st.session_state.dark_mode = not st.session_state.dark_mode
+/* Cards */
+.card {
+    padding: 16px 16px 12px 16px;
+    border-radius: 18px;
+    background: #1F2937;
+    border: 1px solid #333;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.card h3 { margin: 0 0 6px 0; font-weight: 700; }
+.card p  { margin: 0; opacity: 0.8; }
 
-top_left, top_right = st.columns([0.95, 0.05])
+.kpi {
+    font-size: 28px;
+    font-weight: 800;
+}
 
-with top_right:
-    if st.session_state.dark_mode:
-        st.button("☀️", on_click=toggle_theme, help="Switch to light mode")
-    else:
-        st.button("🌙", on_click=toggle_theme, help="Switch to dark mode")
-        
-# ----------------------------
-# Dynamic Theme Styling
-# ----------------------------
-if st.session_state.dark_mode:
-    CUSTOM_CSS = """
-    <style>
-    /* App background & default text */
-    .stApp {
-        background-color: #0E1117;
-        color: #FAFAFA;
-    }
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    background-color: #161B22 !important;
+    border-radius: 14px !important;
+    padding: 6px !important;
+}
+.stTabs [data-baseweb="tab"] {
+    color: #A0A0A0 !important;
+}
+.stTabs [aria-selected="true"] {
+    background-color: #1F2937 !important;
+    color: #FFFFFF !important;
+}
 
-    /* =========================
-       CARDS / KPI BOXES
-    ========================== */
-    .card {
-        padding: 16px 16px 12px 16px;
-        border-radius: 18px;
-        background: #1F2937;
-        border: 1px solid #333;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    }
-    .card h3 { margin: 0 0 6px 0; font-weight: 700; }
-    .card p  { margin: 0; opacity: 0.8; }
-    .kpi {
-        font-size: 28px;
-        font-weight: 800;
-        line-height: 1.1;
-        margin-top: 2px;
-    }
+/* Table */
+div[data-testid="stDataFrame"] div[role="grid"] {
+    background-color: #1F2937 !important;
+    color: #E5E7EB !important;
+}
+div[data-testid="stDataFrame"] div[role="columnheader"] {
+    background-color: #111827 !important;
+    color: #E5E7EB !important;
+}
 
-    a { color: #4da6ff; }
+/* Download button */
+div.stDownloadButton button {
+    background-color: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 600 !important;
+}
 
-    /* =========================
-       DOWNLOAD BUTTON
-    ========================== */
-    .stDownloadButton > button {
-        background-color: #2563EB !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 10px !important;
-        padding: 0.5rem 1rem !important;
-        font-weight: 600 !important;
-    }
-    .stDownloadButton > button:hover {
-        background-color: #1E40AF !important;
-        color: white !important;
-    }
+/* Hover */
+div.stDownloadButton button:hover {
+    background-color: #1E40AF !important;
+    color: #FFFFFF !important;
+}
+</style>
+"""
 
-    /* =========================
-       TABS (Dark Mode)
-    ========================== */
-    .stTabs [data-baseweb="tab-list"] {
-        background-color: #161B22 !important;
-        border-radius: 14px !important;
-        padding: 6px !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        background-color: transparent !important;
-        color: #A0A0A0 !important;
-        font-weight: 600 !important;
-        border-radius: 10px !important;
-        padding: 8px 16px !important;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: #1F2937 !important;
-        color: #FFFFFF !important;
-    }
-
-    /* =========================
-       RADIO BUTTONS
-    ========================== */
-    /* Radio group title (e.g., "Select map metric:") */
-    .stRadio > label {
-        color: #FFFFFF !important;
-        font-weight: 600 !important;
-    }
-
-    /* Each radio option text ("Total Records", "Unique Tools") */
-    div[data-baseweb="radio"] span[class*="radioLabel"] {
-        color: #FFFFFF !important;
-    }
-
-    /* Outer circle of the radio button */
-    div[data-baseweb="radio"] div[role="radio"] {
-        border-color: #FFFFFF !important;
-    }
-
-    /* Inner dot for checked radio */
-    div[data-baseweb="radio"] input:checked + div {
-        background-color: #2563EB !important;
-        border-color: #2563EB !important;
-    }
-
-    /* =========================
-       TABLE (st.dataframe) DARK MODE
-    ========================== */
-    div[data-testid="stDataFrame"] div[role="grid"] {
-        background-color: #1F2937 !important;
-        color: #E5E7EB !important;
-    }
-    div[data-testid="stDataFrame"] div[role="columnheader"] {
-        background-color: #111827 !important;
-        color: #E5E7EB !important;
-    }
-    div[data-testid="stDataFrame"] div[role="row"] {
-        color: #E5E7EB !important;
-    }
-
-    </style>
-    """
-
-else:
-    CUSTOM_CSS = """
-    <style>
-    .stApp {
-      background: radial-gradient(1200px circle at 10% 0%, rgba(255, 215, 0, 0.10), transparent 40%),
-                  radial-gradient(1000px circle at 90% 10%, rgba(0, 136, 255, 0.08), transparent 35%),
-                  linear-gradient(180deg, rgba(250,250,252,1) 0%, rgba(245,247,250,1) 100%);
-    }
-
-    .card {
-      padding: 16px 16px 12px 16px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    }
-
-    .card h3 { margin: 0 0 6px 0; font-weight: 700; }
-    .card p  { margin: 0; opacity: 0.8; }
-
-    .kpi {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.1;
-      margin-top: 2px;
-    }
-
-    a { text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    /* ✅ STYLE DOWNLOAD BUTTON FOR LIGHT MODE */
-    .stDownloadButton > button {
-        background-color: #1f77ff !important;
-        color: white !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-    }
-
-    .stDownloadButton > button:hover {
-        background-color: #1559c1 !important;
-    }
-
-    </style>
-    """
-    
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # ----------------------------
@@ -281,7 +172,27 @@ def as_link(url: str, label: str) -> str:
 # Load data
 # ----------------------------
 st.title(f"⚡ {APP_NAME}")
-st.caption("Explore tool usage, institutions, evidence, and sources — powered by your curated CSV.")
+
+st.markdown("""
+Explore how energy system models are applied across real-world contexts, including institutions, tools, and applications worldwide.
+
+The energy transition is accelerating globally, and decision-makers increasingly rely on energy system models to support planning, policy, and operational decisions. However, understanding how these models are actually used in practice remains fragmented.
+
+This application addresses that gap by providing a structured view of real-world modelling use cases across countries, institutions, and tools.
+
+
+With this dashboard, you can explore questions such as:
+
+❓ Which modelling tools are most widely used across regions?
+❓ How are different institutions applying energy models in practice?
+❓ What types of evidence support these use cases?
+❓ How do modelling practices vary globally?
+
+
+The dataset brings together curated records of energy modelling applications, including information on tools, institutions, use cases, and supporting evidence.
+
+Use the filters and interactive visualizations to explore patterns, compare usage, and gain insights into the evolving energy modelling landscape.
+""")
 
 csv_path = Path(__file__).parent / CSV_FILENAME
 try:
@@ -317,8 +228,12 @@ text_query = st.sidebar.text_input(
 
 # Tool distribution controls
 st.sidebar.header("Tool distribution chart")
-top_n = st.sidebar.slider("Show top N tools", min_value=5, max_value=50, value=20, step=1)
-include_unknown_tools = st.sidebar.checkbox("Include empty/unknown tool_name", value=False)
+top_n = st.sidebar.slider(
+    "Show top N tools", min_value=5, max_value=50, value=20, step=1
+)
+include_unknown_tools = st.sidebar.checkbox(
+    "Include empty/unknown tool_name", value=False
+)
 
 # ----------------------------
 # Apply filters
@@ -337,7 +252,6 @@ if sel_source_type != "All":
 if text_query.strip():
     mask = f.apply(lambda r: contains_text_row(r, text_query.strip()), axis=1)
     f = f[mask]
-    
 
 
 # ----------------------------
@@ -402,16 +316,17 @@ st.write("")
 # MAIN ANALYTICAL TABS
 # ----------------------------
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Overview",
-    "🌍 Geographic Analysis",
-    "🛠 Tool & Category Analysis",
-    "🏛 Institutions",
-    "📄 Records & Export"
-])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    [
+        "📊 Overview",
+        "🌍 Geographic Analysis",
+        "🛠 Tool & Category Analysis",
+        "🏛 Institutions",
+        "📄 Records & Export",
+    ]
+)
 
 with tab1:
-
     st.subheader("Tool name distribution")
 
     tool_series = f["tool_name"].copy()
@@ -433,38 +348,29 @@ with tab1:
             x="count",
             y="tool_name",
             orientation="h",
-            template="plotly_dark" if st.session_state.dark_mode else "plotly_white",
+            template="plotly_dark",
         )
 
-        if st.session_state.dark_mode:
-            fig.update_layout(
-                paper_bgcolor="#111827",
-                plot_bgcolor="#111827",
-                font=dict(color="#FFFFFF"),  # axes, labels, hover text
-                title=dict(
-                    text="Top Tools by Record Count",
-                    font=dict(color="#FFFFFF", size=20)
-                ),
-                yaxis=dict(autorange="reversed")
-            )
-        else:
-            fig.update_layout(
-                title=dict(
-                    text="Top Tools by Record Count",
-                    font=dict(color="#000000", size=20)
-                ),
-                yaxis=dict(autorange="reversed")
-            )
+        fig.update_layout(
+            paper_bgcolor="#111827",
+            plot_bgcolor="#111827",
+            font=dict(color="#FFFFFF"),
+            title=dict(
+                text="Top Tools by Record Count", font=dict(color="#FFFFFF", size=20)
+            ),
+            yaxis=dict(autorange="reversed"),
+        )
 
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("No tool data to display for the current filters.")
-        
+
+
+# =========================
+# TAB 2
+# =========================
 with tab2:
-
     st.subheader("Global Modelling Usage Map")
-
-    
 
     map_metric = option_menu(
         menu_title=None,
@@ -475,21 +381,15 @@ with tab2:
             "container": {"background-color": "#0E1117"},
             "nav-link": {"font-size": "16px", "color": "#FFFFFF"},
             "nav-link-selected": {"background-color": "#2563EB", "color": "white"},
-        }
+        },
     )
 
     if map_metric == "Total Records":
-        map_df = (
-            f.groupby("country_label")
-            .size()
-            .reset_index(name="value")
-        )
+        map_df = f.groupby("country_label").size().reset_index(name="value")
         color_label = "Total Records"
     else:
         map_df = (
-            f.groupby("country_label")["tool_name"]
-            .nunique()
-            .reset_index(name="value")
+            f.groupby("country_label")["tool_name"].nunique().reset_index(name="value")
         )
         color_label = "Unique Tools"
 
@@ -498,11 +398,7 @@ with tab2:
     if map_df.empty:
         st.info("No country data available for the selected filters.")
     else:
-        # Choose color scale based on theme
-        if st.session_state.dark_mode:
-            map_scale = px.colors.sequential.Jet[1:]  # better contrast on dark
-        else:
-            map_scale = "Jet"
+        map_scale = px.colors.sequential.Jet[1:]
 
         fig = px.choropleth(
             map_df,
@@ -514,73 +410,57 @@ with tab2:
             labels={"value": color_label},
         )
 
-        # Theme-specific styling
-        if st.session_state.dark_mode:
-            fig.update_layout(
-                template="plotly_dark",
-                paper_bgcolor="#0E1117",
-                plot_bgcolor="#0E1117",
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=500,
-            )
-            fig.update_geos(
-                bgcolor="#0E1117",
-                showocean=True,
-                oceancolor="#0E1117",
-                lakecolor="#0E1117",
-            )
-        else:
-            fig.update_layout(
-                template="plotly_white",
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=500,
-            )
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="#0E1117",
+            plot_bgcolor="#0E1117",
+            margin=dict(l=0, r=0, t=0, b=0),
+            height=500,
+        )
+
+        fig.update_geos(
+            bgcolor="#0E1117",
+            showocean=True,
+            oceancolor="#0E1117",
+            lakecolor="#0E1117",
+        )
 
         st.plotly_chart(fig, use_container_width=True)
 
 
-        
+# =========================
+# TAB 3
+# =========================
 with tab3:
-
     colA, colB = st.columns(2)
 
-    # Tool category distribution
     with colA:
         cat_counts = (
-            f["tool_category"]
-            .replace("", pd.NA)
-            .dropna()
-            .value_counts()
-            .reset_index()
+            f["tool_category"].replace("", pd.NA).dropna().value_counts().reset_index()
         )
         cat_counts.columns = ["tool_category", "count"]
-        
+
         if not cat_counts.empty:
             fig_cat = px.pie(
                 cat_counts,
                 names="tool_category",
                 values="count",
-                title="Tool Category Distribution",
-                template="plotly_dark" if st.session_state.dark_mode else "plotly_white",
+                template="plotly_dark",
             )
 
-            if st.session_state.dark_mode:
-                fig_cat.update_layout(
-                    paper_bgcolor="#111827",
-                    plot_bgcolor="#111827",
-                    font=dict(color="#FFFFFF"),  # title and hover text
-                    title=dict(
-                        text="Tool Category Distribution",
-                        font=dict(color="#FFFFFF", size=20)
-                    ),
-                    legend=dict(
-                        font=dict(color="#FFFFFF", size=12)  # <-- legend text color
-                    )
-                )
+            fig_cat.update_layout(
+                paper_bgcolor="#111827",
+                plot_bgcolor="#111827",
+                font=dict(color="#FFFFFF"),
+                title=dict(
+                    text="Tool Category Distribution",
+                    font=dict(color="#FFFFFF", size=20),
+                ),
+                legend=dict(font=dict(color="#FFFFFF")),
+            )
 
             st.plotly_chart(fig_cat, use_container_width=True)
 
-    # Evidence strength distribution
     with colB:
         ev_counts = (
             f["evidence_strength"]
@@ -596,27 +476,28 @@ with tab3:
                 ev_counts,
                 x="evidence_strength",
                 y="count",
-                title="Evidence Strength Distribution",
-                template="plotly_dark" if st.session_state.dark_mode else "plotly_white",
+                template="plotly_dark",
             )
 
-            if st.session_state.dark_mode:
-                fig_ev.update_layout(
-                    paper_bgcolor="#111827",
-                    plot_bgcolor="#111827",
-                    font=dict(color="#FFFFFF"),  # All text white
-                    title=dict(
-                        text="Evidence Strength Distribution",
-                        font=dict(color="#FFFFFF", size=20)
-                    ),
-                    xaxis=dict(title_font=dict(color="#FFFFFF"), tickfont=dict(color="#FFFFFF")),
-                    yaxis=dict(title_font=dict(color="#FFFFFF"), tickfont=dict(color="#FFFFFF")),
-                )
+            fig_ev.update_layout(
+                paper_bgcolor="#111827",
+                plot_bgcolor="#111827",
+                font=dict(color="#FFFFFF"),
+                title=dict(
+                    text="Evidence Strength Distribution",
+                    font=dict(color="#FFFFFF", size=20),
+                ),
+                xaxis=dict(tickfont=dict(color="#FFFFFF")),
+                yaxis=dict(tickfont=dict(color="#FFFFFF")),
+            )
 
             st.plotly_chart(fig_ev, use_container_width=True)
-            
-with tab4:
 
+
+# =========================
+# TAB 4
+# =========================
+with tab4:
     inst_counts = (
         f["institution_name"]
         .replace("", pd.NA)
@@ -635,35 +516,28 @@ with tab4:
             x="count",
             y="institution_name",
             orientation="h",
-            title="Top Institutions by Record Count",
-            template="plotly_dark" if st.session_state.dark_mode else "plotly_white",
+            template="plotly_dark",
         )
 
-        # Dark mode adjustments
-        if st.session_state.dark_mode:
-            fig_inst.update_layout(
-                paper_bgcolor="#111827",
-                plot_bgcolor="#111827",
-                font=dict(color="#FFFFFF"),  # All text white
-                title=dict(
-                    text="Top Institutions by Record Count",
-                    font=dict(color="#FFFFFF", size=20)
-                ),
-                xaxis=dict(title_font=dict(color="#FFFFFF"), tickfont=dict(color="#FFFFFF")),
-                yaxis=dict(title_font=dict(color="#FFFFFF"), tickfont=dict(color="#FFFFFF")),
-                height=700,
-                yaxis_autorange="reversed",
-            )
-        else:
-            fig_inst.update_layout(
-                height=700,
-                yaxis_autorange="reversed",
-            )
+        fig_inst.update_layout(
+            paper_bgcolor="#111827",
+            plot_bgcolor="#111827",
+            font=dict(color="#FFFFFF"),
+            title=dict(
+                text="Top Institutions by Record Count",
+                font=dict(color="#FFFFFF", size=20),
+            ),
+            height=700,
+            yaxis_autorange="reversed",
+        )
 
         st.plotly_chart(fig_inst, use_container_width=True)
-        
-with tab5:
 
+
+# =========================
+# TAB 5
+# =========================
+with tab5:
     st.subheader("Filtered Records")
 
     display = f.copy()
@@ -696,29 +570,30 @@ with tab5:
 
     # Convert links to markdown
     if "source_link" in table_df.columns:
-        table_df["source_link"] = table_df["source_link"].apply(lambda u: as_link(u, "Source"))
-    if "official_website" in table_df.columns:
-        table_df["official_website"] = table_df["official_website"].apply(lambda u: as_link(u, "Website"))
-
-    # Dark mode table styling
-    if st.session_state.dark_mode:
-        st.dataframe(
-            table_df.style.set_properties(**{
-                'background-color': '#1E1E1E',
-                'color': '#FFFFFF',
-                'border-color': '#333333'
-            }),
-            use_container_width=True,
-            hide_index=True
+        table_df["source_link"] = table_df["source_link"].apply(
+            lambda u: as_link(u, "Source")
         )
-    else:
-        st.dataframe(table_df, use_container_width=True, hide_index=True)
+    if "official_website" in table_df.columns:
+        table_df["official_website"] = table_df["official_website"].apply(
+            lambda u: as_link(u, "Website")
+        )
 
-    # CSV download
+    st.dataframe(
+        table_df.style.set_properties(
+            **{
+                "background-color": "#1E1E1E",
+                "color": "#FFFFFF",
+                "border-color": "#333333",
+            }
+        ),
+        use_container_width=True,
+        hide_index=True,
+    )
+
     csv_bytes = f.to_csv(index=False).encode("utf-8")
     st.download_button(
         "⬇️ Download filtered CSV",
         data=csv_bytes,
-        file_name="filtered_grid_operators_modelling_usage.csv",
+        file_name="filtered_energy_model_use_case_tracker.csv",
         mime="text/csv",
     )
